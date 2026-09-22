@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Student Management System | Edson Kamugisha Edwin</title>
+  <meta name="description" content="Student Management System A command-line application for managing students, courses, enrollments and grades.">
+  <meta name="author" content="Edson Kamugisha Edwin">
+  <meta name="theme-color" content="#050A14">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Student Management System | Edson Kamugisha Edwin">
+  <meta property="og:description" content="Student Management System A command-line application for managing students, courses, enrollments and grades.">
+  <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+  <script>
+    (function () {
+      var d = document.documentElement;
+      d.className = 'js';
+      var t = 'dark';
+      try { var s = localStorage.getItem('theme'); if (s === 'light' || s === 'dark') t = s; } catch (e) {}
+      d.setAttribute('data-theme', t);
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="bg" aria-hidden="true"><span class="bg__grid"></span><span class="bg__glow bg__glow--a"></span><span class="bg__glow bg__glow--b"></span></div>
+  <div class="progress" aria-hidden="true"><span id="progress"></span></div>
+
+  <header class="site-header" id="site-header">
+    <div class="wrap header-bar">
+      <a class="brand" href="index.html" aria-label="Edson Kamugisha Edwin, home">
+        <span class="brand__mark"><svg viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="gbrand" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22D3EE"/><stop offset="1" stop-color="#4F8CFF"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#gbrand)"/><path d="M12.5 11 L7.5 16 L12.5 21 M19.5 11 L24.5 16 L19.5 21" fill="none" stroke="#04101F" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="brand__name">Edson Kamugisha Edwin</span>
+      </a>
+      <nav class="nav-links" aria-label="Main"><a href="index.html">Home</a><a href="about.html">About</a><a href="projects.html" aria-current="page">Projects</a><a href="contact.html">Contact</a></nav>
+      <div class="header-actions">
+        <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch to light mode"><svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+        <button class="icon-btn menu-btn" id="menu-btn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+    <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile"><a href="index.html">Home<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a href="about.html">About<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a href="projects.html" aria-current="page">Projects<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a href="contact.html">Contact<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></nav>
+  </header>
+
+  <main id="main" class="page">
+
+    <section class="page-head">
+      <div class="wrap">
+        <ul class="crumbs"><li><a href="index.html">Home</a></li><li><a href="projects.html">Projects</a></li><li aria-current="page">Student Management System</li></ul>
+        <h1 class="reveal">Student Management System</h1>
+        <p class="lede reveal" style="--d:.1s">A command-line application for managing students, courses, enrollments and grades.</p>
+        <ul class="chips reveal" style="--d:.15s"><li class="chip">C11</li><li class="chip">SQLite3</li><li class="chip">Make</li></ul>
+        <div class="actions reveal" style="--d:.2s">
+          <a class="btn btn--primary" href="https://github.com/eDDie-05" target="_blank" rel="noopener"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg> View code on GitHub</a>
+          <a class="btn btn--ghost" href="projects.html">All projects</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--tight" aria-label="Project overview">
+      <div class="wrap">
+        <figure class="figure reveal">
+          <div class="card"><img src="images/project-sms.svg" alt="Illustration: a terminal building a C program with zero warnings and showing a menu" width="800" height="500"></div>
+          <figcaption>Concept illustration of the project.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section section--tight" aria-label="Project details">
+      <div class="wrap detail-grid">
+        <div class="detail-stack"><div class="reveal" style="--d:0.06s"><div class="card card__pad"><h2>Solution</h2><p class="muted">A modular C11 application backed by SQLite3, organised across several source and header files and built with a Makefile.</p></div></div><div class="reveal" style="--d:0.12s"><div class="card card__pad"><h2>Features</h2><ul class="checks"><li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Student and course records: create, read, update and delete</li><li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Enrollment tracking</li><li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Letter grade recording with automatic credit-weighted GPA</li><li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Email validation</li><li><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Foreign key cascade deletes</li></ul></div></div></div>
+        <aside class="card card__pad aside-card reveal" style="--d:.1s">
+          <h2>Project facts</h2>
+          <dl class="facts-list"><div><dt>Context</dt><dd>C programming coursework at IFM</dd></div><div><dt>Built with</dt><dd>C11, SQLite3, Make</dd></div><div><dt>Status</dt><dd>Completed</dd></div></dl>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section section--tight" aria-label="More projects">
+      <div class="wrap pager">
+        <div class="reveal"><a class="card" href="project-land.html" data-cursor-label="Back"><span class="pager__label">Previous project</span><span class="pager__title">Land Registration System database</span></a></div>
+        <div class="reveal" style="--d:.08s"><a class="card card--next" href="project-endpoint.html" data-cursor-label="Next"><span class="pager__label">Next project</span><span class="pager__title">Bravado Endpoint Security System</span></a></div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="cta-title">
+      <div class="wrap">
+        <div class="cta__box reveal">
+          <h2 id="cta-title">Have an internship or project in mind?</h2>
+          <p>I'm open to internship opportunities. Send me a message and I'll get back to you.</p>
+          <div class="cta__actions">
+            <a class="btn btn--primary" href="contact.html">Contact me <svg class="icon icon--arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            <a class="btn btn--ghost" href="projects.html">View projects</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div>
+          <a class="brand" href="index.html"><span class="brand__mark"><svg viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="gbrand" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22D3EE"/><stop offset="1" stop-color="#4F8CFF"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#gbrand)"/><path d="M12.5 11 L7.5 16 L12.5 21 M19.5 11 L24.5 16 L19.5 21" fill="none" stroke="#04101F" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Edson Kamugisha Edwin</span></a>
+          <p>Computer Science student and software developer in Dar es Salaam, Tanzania.</p>
+        </div>
+        <div>
+          <h2>Pages</h2>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="projects.html">Projects</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h2>Find me</h2>
+          <ul class="footer-links">
+            <li><a href="https://github.com/eDDie-05" target="_blank" rel="noopener"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>GitHub</a></li>
+            <li><a href="https://www.linkedin.com/search/results/people/?keywords=Edson%20Kamugisha%20Edwin" target="_blank" rel="noopener"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>LinkedIn</a></li>
+            <li><a href="mailto:edynamite05@gmail.com"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>Email</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Edson Kamugisha Edwin</p>
+        <p>Built with HTML, CSS and JavaScript.</p>
+      </div>
+    </div>
+  </footer>
+
+  <button class="to-top" id="to-top" type="button" aria-label="Back to top"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+  <script src="js/main.js"></script>
+</body>
+</html>
