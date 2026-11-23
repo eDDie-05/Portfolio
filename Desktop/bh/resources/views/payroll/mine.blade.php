@@ -1,0 +1,5 @@
+@extends('layouts.app', ['title' => 'My payslips'])
+@section('crumb', 'My work / Payslips')
+@section('content')
+<div class="page-wrap"><div class="page-heading"><div><div class="eyebrow">MY WORK / PAYROLL</div><h1>My payslips</h1><p>Only approved payroll periods are shown.</p></div></div><section class="panel"><div class="table-wrap"><table><thead><tr><th>PERIOD</th><th>PAY DATE</th><th>CURRENCY</th><th>GROSS</th><th>DEDUCTIONS</th><th>NET</th><th></th></tr></thead><tbody>@forelse($entries as $entry)<tr><td>{{ $entry->payrollPeriod->period_key }}</td><td>{{ $entry->payrollPeriod->pay_on->format('M j, Y') }}</td><td>{{ $entry->currency }}</td><td>{{ number_format((float) $entry->gross_amount, 2) }}</td><td>{{ number_format((float) $entry->deductions_amount, 2) }}</td><td>{{ number_format((float) $entry->net_amount, 2) }}</td><td><a class="button button-light button-small" href="{{ route('payroll.payslip.mine', $entry) }}">View payslip</a></td></tr>@empty<tr><td colspan="7" class="table-empty">Approved payslips will appear here.</td></tr>@endforelse</tbody></table></div>{{ $entries->links() }}</section></div>
+@endsection

@@ -1,0 +1,68 @@
+services:
+  - type: web
+    name: bravado-hrms
+    runtime: docker
+    dockerfilePath: ./Dockerfile.render
+    region: singapore
+    plan: free
+    healthCheckPath: /up
+    initialDeployHook: php artisan hrms:create-admin
+    autoDeploy: true
+    envVars:
+      - fromGroup: bravado-production
+      - key: APP_KEY
+        generateValue: true
+      - key: HRMS_INITIAL_ADMIN_NAME
+        sync: false
+      - key: HRMS_INITIAL_ADMIN_EMAIL
+        sync: false
+      - key: HRMS_INITIAL_ADMIN_PASSWORD
+        sync: false
+      - key: APP_URL
+        fromService:
+          name: bravado-hrms
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: DB_URL
+        fromDatabase:
+          name: bravado-hrms-db
+          property: connectionString
+      - key: DB_CONNECTION
+        value: pgsql
+
+databases:
+  - name: bravado-hrms-db
+    region: singapore
+    plan: free
+    databaseName: bravado_hrms
+    user: bravado_hrms
+
+envVarGroups:
+  - name: bravado-production
+    envVars:
+      - key: APP_NAME
+        value: Bravado HRMS
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: warning
+      - key: SESSION_DRIVER
+        value: database
+      - key: SESSION_ENCRYPT
+        value: "true"
+      - key: SESSION_SECURE_COOKIE
+        value: "true"
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: FILESYSTEM_DISK
+        value: local
+      - key: ATTENDANCE_TIMEZONE
+        value: Africa/Dar_es_Salaam
+      - key: MAIL_MAILER
+        value: log

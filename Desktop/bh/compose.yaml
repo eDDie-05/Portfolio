@@ -1,0 +1,122 @@
+services:
+  app:
+    build:
+      context: .
+      target: runtime
+    env_file:
+      - .env
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      REDIS_HOST: redis
+      CACHE_STORE: redis
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: redis
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      target: web
+    ports:
+      - "127.0.0.1:8080:80"
+    depends_on:
+      - app
+    networks:
+      - hrms
+    restart: unless-stopped
+
+  queue:
+    build:
+      context: .
+      target: runtime
+    env_file:
+      - .env
+    command: ["php", "artisan", "queue:work", "redis", "--sleep=2", "--tries=5", "--timeout=120"]
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      REDIS_HOST: redis
+      CACHE_STORE: redis
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: redis
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms
+    restart: unless-stopped
+
+  scheduler:
+    build:
+      context: .
+      target: runtime
+    env_file:
+      - .env
+    command: ["php", "artisan", "schedule:work"]
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      REDIS_HOST: redis
+      CACHE_STORE: redis
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: redis
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms
+    restart: unless-stopped
+
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-bravado_hrms}
+      POSTGRES_USER: ${DB_USERNAME:-bravado}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set a strong DB_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-bravado} -d ${DB_DATABASE:-bravado_hrms}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - hrms
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - hrms
+    restart: unless-stopped
+
+networks:
+  hrms:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
