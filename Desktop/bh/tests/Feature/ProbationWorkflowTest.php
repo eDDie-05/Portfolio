@@ -18,7 +18,13 @@ class ProbationWorkflowTest extends TestCase
         $originalEndDate = now()->subDays(2)->toDateString();
         $employee->forceFill(['probation_ends_on' => $originalEndDate])->save();
 
-        $this->actingAs($administrator)->get('/probation')->assertOk()->assertSee('Probation reviews')->assertSee('Probation Employee')->assertSee('2 days overdue');
+        $this->actingAs($administrator)->get('/probation')
+            ->assertOk()
+            ->assertSee('Probation reviews')
+            ->assertSee('Probation Employee')
+            ->assertSee('2 days overdue')
+            ->assertSee('data-probation-search', false)
+            ->assertSee('Log out');
         $this->post('/probation/'.$employee->id.'/review', [
             'decision' => 'extended',
             'review_note' => 'Additional coaching period required.',
@@ -55,16 +61,26 @@ class ProbationWorkflowTest extends TestCase
         $report->forceFill(['probation_ends_on' => $probationEndDate, 'manager_id' => $manager->id])->save();
         $otherEmployee->forceFill(['probation_ends_on' => $probationEndDate])->save();
 
-        $this->actingAs($manager)->get('/probation')->assertOk()->assertSee('PRB-201')->assertDontSee('PRB-202');
+        $this->actingAs($manager)->get('/probation')
+            ->assertOk()
+            ->assertSee('PRB-201')
+            ->assertDontSee('PRB-202')
+            ->assertSee('Log out');
         $this->post('/probation/'.$otherEmployee->id.'/review', [
             'decision' => 'confirmed',
             'review_note' => 'Not in scope.',
         ])->assertForbidden();
-        $this->post('/probation/'.$report->id.'/review', [
+        $this->from('/probation')->actingAs($manager)->post('/probation/'.$report->id.'/review', [
             'decision' => 'extended',
             'review_note' => 'Extension date is unchanged.',
             'new_probation_ends_on' => $probationEndDate,
-        ])->assertSessionHasErrors('new_probation_ends_on');
+            'review_employee_id' => $report->id,
+        ])->assertRedirect('/probation')->assertSessionHasErrors('new_probation_ends_on');
+        $reviewPage = $this->get('/probation')->assertOk()->assertSee('Extension date is unchanged.');
+        $this->assertMatchesRegularExpression(
+            '/<details[^>]*data-probation-review-form[^>]*\bopen\b/s',
+            $reviewPage->getContent()
+        );
         $this->assertSame('pending', $report->fresh()->probation_review_status);
         $this->actingAs($report)->get('/probation')->assertForbidden();
     }

@@ -2243,3 +2243,301 @@ html[data-theme='dark'] .quick-action:hover {
         transition: none !important;
     }
 }
+
+.probation-page {
+    max-width: 1360px;
+}
+
+.probation-heading {
+    align-items: center;
+}
+
+.probation-heading-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 9px 13px;
+    border: 1px solid #d5ecdf;
+    border-radius: 999px;
+    color: #26744e;
+    background: #f0faf4;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.probation-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.probation-stat-card {
+    position: relative;
+    overflow: hidden;
+    min-height: 140px;
+    padding: 18px 20px;
+    border-radius: var(--radius-card);
+    background: linear-gradient(145deg, var(--paper), var(--surface-raised));
+    box-shadow: var(--shadow-panel);
+    transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.probation-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+.probation-stat-card .stat-value {
+    color: var(--ink);
+    font-size: 32px;
+}
+
+.probation-stat-card .stat-foot {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.probation-panel {
+    overflow: visible;
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-panel);
+}
+
+.probation-panel > .panel-heading {
+    padding: 19px 20px 16px;
+}
+
+.probation-panel > .panel-heading h2 {
+    color: var(--ink);
+    font-size: 17px;
+}
+
+.probation-panel > .panel-heading p {
+    font-size: 12px;
+}
+
+.probation-toolbar {
+    display: grid;
+    grid-template-columns: minmax(240px, 1fr) minmax(180px, 240px) auto;
+    align-items: end;
+    gap: 14px;
+    padding: 16px 20px;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    background: var(--surface-raised);
+}
+
+.probation-search,
+.probation-status-filter {
+    display: grid;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.probation-search input,
+.probation-status-filter select {
+    width: 100%;
+    min-height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-control);
+    color: var(--ink);
+    background: var(--paper);
+    font: 13px var(--font);
+}
+
+.probation-search input:focus,
+.probation-status-filter select:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: var(--focus-ring);
+}
+
+.probation-results {
+    margin: 0 0 10px;
+    color: var(--muted);
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.probation-table {
+    min-width: 1000px;
+}
+
+.probation-table th,
+.probation-table td {
+    padding: 14px 16px;
+    font-size: 12px;
+    white-space: normal;
+    vertical-align: top;
+}
+
+.probation-table th {
+    color: var(--muted);
+    background: var(--surface-raised);
+}
+
+.probation-table tbody tr:not([hidden]):hover td {
+    background: color-mix(in srgb, var(--blue) 4%, var(--paper));
+}
+
+.probation-employee strong,
+.probation-table td > strong {
+    display: block;
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.probation-table td small {
+    display: block;
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+.probation-review-status .status-pill {
+    font-size: 10px;
+}
+
+.probation-review-action {
+    min-width: 135px;
+}
+
+.probation-review > summary {
+    list-style: none;
+    cursor: pointer;
+}
+
+.probation-review > summary::-webkit-details-marker {
+    display: none;
+}
+
+.probation-review[open] > summary {
+    color: var(--blue-dark);
+    border-color: #cbd9f8;
+}
+
+.probation-review-form {
+    position: relative;
+    z-index: 1;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px;
+    width: clamp(280px, 34vw, 420px);
+    margin-top: 10px;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    background: var(--paper);
+    box-shadow: var(--shadow-hover);
+}
+
+.probation-review-form label {
+    gap: 6px;
+    color: var(--ink);
+    font-size: 12px;
+}
+
+.probation-review-form textarea,
+.probation-review-form select,
+.probation-review-form input {
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-control);
+    color: var(--ink);
+    background: var(--paper);
+    font: 13px var(--font);
+}
+
+.probation-review-form textarea {
+    min-height: 88px;
+    resize: vertical;
+}
+
+.probation-review-form .button {
+    justify-self: start;
+    min-height: 40px;
+    font-size: 12px;
+}
+
+.probation-closed {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.probation-pagination {
+    padding: 4px 20px 18px;
+}
+
+html[data-theme='dark'] .probation-heading-note {
+    border-color: #28503e;
+    color: #9be0bc;
+    background: #14312d;
+}
+
+html[data-theme='dark'] .probation-toolbar {
+    border-color: var(--line);
+}
+
+html[data-theme='dark'] .probation-table tbody tr:not([hidden]):hover td {
+    background: color-mix(in srgb, var(--blue) 10%, var(--paper));
+}
+
+@media (max-width: 1050px) {
+    .probation-toolbar {
+        grid-template-columns: minmax(220px, 1fr) minmax(170px, 220px);
+    }
+
+    .probation-results {
+        grid-column: 1 / -1;
+        margin-bottom: 0;
+    }
+}
+
+@media (max-width: 700px) {
+    .probation-heading {
+        align-items: flex-start;
+    }
+
+    .probation-heading-note {
+        white-space: normal;
+    }
+
+    .probation-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .probation-toolbar {
+        grid-template-columns: 1fr;
+        padding: 14px;
+    }
+
+    .probation-results {
+        grid-column: auto;
+        white-space: normal;
+    }
+
+    .probation-review-form {
+        width: min(320px, 75vw);
+    }
+
+    .probation-pagination {
+        padding: 4px 14px 14px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .probation-stat-card {
+        transition: none;
+    }
+
+    .probation-stat-card:hover {
+        transform: none;
+    }
+}

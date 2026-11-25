@@ -144,6 +144,50 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const probationTable = document.querySelector('[data-probation-table]');
+    const probationSearch = document.querySelector('[data-probation-search]');
+    const probationStatusFilter = document.querySelector('[data-probation-status]');
+
+    if (probationTable instanceof HTMLTableElement) {
+        const probationRows = Array.from(probationTable.querySelectorAll('[data-probation-row]'));
+        const emptyFilterRow = probationTable.querySelector('[data-probation-empty-filter]');
+        const resultsMessage = document.querySelector('[data-probation-results]');
+
+        const updateProbationRows = () => {
+            const searchTerm = probationSearch instanceof HTMLInputElement
+                ? probationSearch.value.trim().toLocaleLowerCase()
+                : '';
+            const selectedStatus = probationStatusFilter instanceof HTMLSelectElement
+                ? probationStatusFilter.value
+                : 'all';
+            let visibleCount = 0;
+
+            probationRows.forEach((row) => {
+                const searchText = (row.dataset.searchText ?? '').toLocaleLowerCase();
+                const matchesSearch = searchText.includes(searchTerm);
+                const matchesStatus = selectedStatus === 'all' || row.dataset.reviewStatus === selectedStatus;
+                const isVisible = matchesSearch && matchesStatus;
+
+                row.hidden = !isVisible;
+                if (isVisible) {
+                    visibleCount += 1;
+                }
+            });
+
+            if (emptyFilterRow instanceof HTMLTableRowElement) {
+                emptyFilterRow.hidden = visibleCount > 0 || probationRows.length === 0;
+            }
+
+            if (resultsMessage instanceof HTMLElement) {
+                resultsMessage.textContent = `Showing ${visibleCount} of ${probationRows.length} employees on this page`;
+            }
+        };
+
+        probationSearch?.addEventListener('input', updateProbationRows);
+        probationStatusFilter?.addEventListener('change', updateProbationRows);
+        updateProbationRows();
+    }
+
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const counters = document.querySelectorAll('[data-count-up]');
 
