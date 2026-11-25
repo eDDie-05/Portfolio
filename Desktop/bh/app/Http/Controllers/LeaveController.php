@@ -183,9 +183,21 @@ class LeaveController extends Controller
             'name' => ['required', 'string', 'max:100', 'unique:leave_types,name'],
             'description' => ['nullable', 'string', 'max:1000'],
             'deducts_balance' => ['required', 'boolean'],
+            'payroll_treatment' => ['required', Rule::in(['paid', 'unpaid', 'fractional'])],
+            'payroll_paid_fraction' => ['required_if:payroll_treatment,fractional', 'nullable', 'numeric', 'between:0,1'],
         ]);
+        $data['payroll_paid_fraction'] = match ($data['payroll_treatment']) {
+            'unpaid' => 0,
+            'fractional' => $data['payroll_paid_fraction'],
+            default => 1,
+        };
         $leaveType = LeaveType::create([...$data, 'is_active' => true]);
-        $this->audit($request, 'leave.type_created', 'leave_type', $leaveType->id, ['deducts_balance' => $leaveType->deducts_balance, 'is_active' => $leaveType->is_active]);
+        $this->audit($request, 'leave.type_created', 'leave_type', $leaveType->id, [
+            'deducts_balance' => $leaveType->deducts_balance,
+            'payroll_treatment' => $leaveType->payroll_treatment,
+            'payroll_paid_fraction' => $leaveType->payroll_paid_fraction,
+            'is_active' => $leaveType->is_active,
+        ]);
 
         return back()->with('status', 'Leave type added. Assign balances where required.');
     }
@@ -197,10 +209,20 @@ class LeaveController extends Controller
             'description' => ['nullable', 'string', 'max:1000'],
             'deducts_balance' => ['required', 'boolean'],
             'is_active' => ['required', 'boolean'],
+            'payroll_treatment' => ['required', Rule::in(['paid', 'unpaid', 'fractional'])],
+            'payroll_paid_fraction' => ['required_if:payroll_treatment,fractional', 'nullable', 'numeric', 'between:0,1'],
         ]);
-        $originalValues = $leaveType->only(['description', 'deducts_balance', 'is_active']);
+        $data['payroll_paid_fraction'] = match ($data['payroll_treatment']) {
+            'unpaid' => 0,
+            'fractional' => $data['payroll_paid_fraction'],
+            default => 1,
+        };
+        $originalValues = $leaveType->only(['description', 'deducts_balance', 'is_active', 'payroll_treatment', 'payroll_paid_fraction']);
         $leaveType->update($data);
-        $this->audit($request, 'leave.type_updated', 'leave_type', $leaveType->id, ['original_values' => $originalValues, 'revised_values' => $leaveType->only(['description', 'deducts_balance', 'is_active'])]);
+        $this->audit($request, 'leave.type_updated', 'leave_type', $leaveType->id, [
+            'original_values' => $originalValues,
+            'revised_values' => $leaveType->only(['description', 'deducts_balance', 'is_active', 'payroll_treatment', 'payroll_paid_fraction']),
+        ]);
 
         return back()->with('status', 'Leave type policy updated.');
     }

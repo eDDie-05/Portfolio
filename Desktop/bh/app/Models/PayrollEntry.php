@@ -8,7 +8,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PayrollEntry extends Model
 {
-    protected $fillable = ['payroll_period_id', 'employee_id', 'salary_structure_id', 'employee_number_snapshot', 'employee_name_snapshot', 'currency', 'basic_amount', 'gross_amount', 'deductions_amount', 'benefits_amount', 'net_amount', 'employer_contributions_amount'];
+    protected $fillable = [
+        'payroll_period_id', 'employee_id', 'salary_structure_id', 'employee_number_snapshot', 'employee_name_snapshot',
+        'department_snapshot', 'job_title_snapshot', 'tax_identifier_snapshot', 'tax_residency_snapshot', 'pension_fund_snapshot',
+        'currency', 'basic_amount', 'gross_amount', 'deductions_amount',
+        'benefits_amount', 'net_amount', 'employer_contributions_amount',
+    ];
 
     protected function casts(): array
     {

@@ -7,11 +7,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LeaveType extends Model
 {
-    protected $fillable = ['name', 'description', 'deducts_balance', 'is_active'];
+    protected $fillable = ['name', 'description', 'deducts_balance', 'is_active', 'payroll_treatment', 'payroll_paid_fraction'];
 
     protected function casts(): array
     {
-        return ['deducts_balance' => 'boolean', 'is_active' => 'boolean'];
+        return [
+            'deducts_balance' => 'boolean',
+            'is_active' => 'boolean',
+            'payroll_paid_fraction' => 'decimal:4',
+        ];
     }
 
     public function requests(): HasMany

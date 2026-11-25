@@ -7,7 +7,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EmployeeSalaryAssignment extends Model
 {
-    protected $fillable = ['employee_id', 'salary_structure_id', 'assigned_by', 'effective_from', 'effective_to'];
+    protected $fillable = [
+        'employee_id', 'salary_structure_id', 'assigned_by', 'effective_from', 'effective_to', 'change_reason',
+        'salary_grade', 'salary_scale', 'salary_step',
+    ];
 
     protected function casts(): array
     {

@@ -5,7 +5,9 @@ namespace Tests\Feature;
 use App\Models\Branch;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class EmployeeWorkspaceTest extends TestCase
@@ -71,7 +73,55 @@ class EmployeeWorkspaceTest extends TestCase
 
     public function test_administrator_pages_render_with_live_provisional_device_data(): void
     {
-        $this->actingAs($this->administrator())->get('/')->assertOk()->assertSee('Attendance overview')->assertSee('ZKT-001');
+        $this->actingAs($this->administrator())->get('/')
+            ->assertOk()
+            ->assertSee('Attendance overview')
+            ->assertSee('Active employees')
+            ->assertSee('Employees on leave')
+            ->assertSee('Quick actions')
+            ->assertSee('Add employee')
+            ->assertSee('ZKT-001');
         $this->get('/devices')->assertOk()->assertSee('Device management')->assertSee('Awaiting configuration');
+    }
+
+    public function test_dashboard_quick_actions_respect_role_permissions(): void
+    {
+        $manager = new User;
+        $manager->forceFill(['name' => 'HR Manager', 'email' => 'manager@example.test', 'password' => Hash::make('SecureStartPassword123!'), 'role' => 'hr_manager', 'is_active' => true])->save();
+
+        $this->actingAs($manager)->get('/')
+            ->assertOk()
+            ->assertSee('Add employee')
+            ->assertSee('Review leave')
+            ->assertDontSee('View reports')
+            ->assertDontSee('Manage devices');
+
+        $officer = new User;
+        $officer->forceFill(['name' => 'Attendance Officer', 'email' => 'officer@example.test', 'password' => Hash::make('SecureStartPassword123!'), 'role' => 'attendance_officer', 'is_active' => true])->save();
+
+        $this->actingAs($officer)->get('/')
+            ->assertOk()
+            ->assertSee('Manage devices')
+            ->assertDontSee('Add employee')
+            ->assertDontSee('Review leave')
+            ->assertDontSee('View reports');
+    }
+
+    public function test_profile_photo_is_served_inline_and_shown_in_the_dashboard(): void
+    {
+        Storage::fake('local');
+        $administrator = $this->administrator();
+        $photoPath = UploadedFile::fake()->image('profile.png')->store('profile-photos/'.$administrator->id, 'local');
+        $administrator->forceFill(['profile_photo_path' => $photoPath])->save();
+
+        $photoResponse = $this->actingAs($administrator)->get(route('account.profile-photo'));
+        $photoResponse->assertOk()->assertHeader('Content-Type', 'image/png');
+        $this->assertStringStartsWith('inline;', $photoResponse->headers->get('Content-Disposition'));
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee(route('account.profile-photo'), false)
+            ->assertSee('dashboard-profile-avatar', false);
+        $this->get(route('account.edit'))->assertOk()->assertSee('Profile picture');
     }
 }

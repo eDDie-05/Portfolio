@@ -14,6 +14,9 @@ class ExampleTest extends TestCase
     {
         $response = $this->get('/login');
 
-        $response->assertStatus(200);
+        $response->assertOk()
+            ->assertSee('HR Management System')
+            ->assertSee('login.css?v=', false)
+            ->assertSee('aria-label="Show password"', false);
     }
 }

@@ -16,7 +16,7 @@ Bravado Group's Laravel attendance and HRMS foundation. The implementation keeps
 - Onboarding workflow linked from hired applicants, assigned checklists, private document requests/uploads, versioned private PDF contracts with signed-copy return/decline tracking, and case completion rules.
 - Probation review screen with upcoming/overdue counts, direct-report access for HR managers, extension and review outcomes, and audit history.
 - Offboarding case management with restricted HR ownership, assigned department and asset clearance, exit interview outcomes, final-payroll status recording, cancellation history, and account deactivation after clearance and the last working day. Inactive accounts are logged out on their next web request.
-- Configurable gross-to-net payroll with effective-dated salary assignments, decimal component and adjustment calculations, immutable period snapshots, separated processing/approval, finance payment references, employee payslips, and approved-period CSV export. Tax and statutory components have no default rates and require employer/legal verification.
+- Tanzania-focused payroll with grade/scale/step salary assignments, effective-dated and versioned salary components, configurable statutory and overtime rules, employee-submitted and manager-approved overtime, approved/disbursed loan and advance repayment ledgers, encrypted tax identifiers, immutable payroll snapshots, separate processing/approval/payment/close, employee payslips, annual tax-preparation and department CSV reports, and generic bank payment export.
 - Dar es Salaam and Dodoma branches with provisional `ZKT-001` and `ZKT-002` devices.
 - Device registration, editing, deactivation, credential revocation, audit trail, and discovery checklist.
 - Compatibility attestation gate before a device API credential can be issued.
@@ -34,7 +34,7 @@ Bravado Group's Laravel attendance and HRMS foundation. The implementation keeps
 - Leave working-day/holiday policy, accrual automation, multi-level approval, calendar/report views, and leave notifications.
 - Shift assignment UI and policy-approved attendance calculations, lateness, overtime, and correction approval workflows.
 - Full dashboards for expected, missing, late, incomplete, Windows-agent, and comparison indicators. Current attendance figures are limited to actual event/device data and do not invent expected attendance.
-- Document expiry reminders and version grouping, position/grade administration, transfer and promotion workflows, equipment allocation, orientation templates, onboarding reminders, probation notifications, progressive country tax tables, payroll corrections/reversals, loan ledgers, automated attendance/overtime/leave proration, bank integration, PDF file generation, performance, training, inventory-backed assets, expenses, and notifications.
+- Document expiry reminders and version grouping, position/grade administration, transfer and promotion workflows, equipment allocation, orientation templates, onboarding reminders, probation notifications, progressive country tax tables, payroll corrections/reversals, automated attendance/overtime/leave proration, bank integration, PDF file generation, performance, training, inventory-backed assets, expenses, and notifications.
 - Recruitment email delivery, vacancy approval workflows, and candidate-data retention/anonymization policies remain to be configured or implemented. Offer links are generated for HR to send through an approved channel; the app does not send recruitment email.
 - Windows agent build, signed deployment package, endpoint security-log configuration validation, computer-account mapping screen, and testing on an authorized Windows machine.
 - TLS certificates and a production HTTPS ingress/reverse proxy. Compose binds its development Nginx port to localhost; expose it only behind the company's HTTPS gateway.
@@ -43,6 +43,35 @@ Bravado Group's Laravel attendance and HRMS foundation. The implementation keeps
 - Production database capacity, high availability, backup automation, restore drills, and retention still need a production-sized plan. The current free Render database/service settings are not a capacity guarantee for large datasets; choose paid resource limits from expected attendance volume and retention requirements before production use.
 
 Do not report devices as connected until a credentialed event batch arrives from a compatibility-verified device. The connection-check action records a skipped check until a compatible adapter is configured.
+
+## Payroll configuration and operating limits
+
+Payroll processing keeps calculation logic server-side in `app/Payroll/`. The calculation pipeline uses the employee's effective-dated salary assignment, recurring components whose dates cover the whole period, approved overtime, documented draft adjustments, configured statutory rules, and decimal arithmetic. A component starting or ending mid-period blocks processing; record a reviewed pro-rata adjustment rather than applying a full-month value. Processing is transactional; a failed check rolls back the run. A processed period stores immutable payroll lines and snapshots of every applicable statutory and overtime rule version. Salary assignment changes keep prior assignments, require a reason/reference, and create an audit event.
+
+Employees with an employee number are included in payroll unless their profile explicitly marks them `excluded`. The draft readiness check blocks processing if an included employee has no full-period matching assignment, an overlapping assignment, an incomplete required Tanzania profile, a missing effective statutory rule, unreviewed overtime, or approved non-full-pay leave without a manual leave adjustment. Excluded employees are intentionally left out. Configure that status only after confirming the employee is not payable in the period.
+
+Before processing a Tanzania TZS period, configure one active rule that covers the entire period for each statutory code: PAYE, NSSF, PSSSF, NHIF, SDL, WCF, and HESLB. Enter rates and progressive PAYE bands only after checking the current official requirements for the selected Mainland or Zanzibar jurisdiction. Use an explicit zero rate only when the verified policy says there is no contribution. SDL also requires the verified employer headcount threshold. Configure the employee's tax residency, pension membership, NHIF enrollment, and HESLB billing status; payroll will not infer missing profile values. Updating a statutory rule creates a new version and closes an earlier open version at the previous day. Existing payroll snapshots are not changed.
+
+Employee tax/member identifiers and bank account numbers use Laravel encrypted casts at rest in the database. They are excluded from model serialization and audit details. The generic bank export is available only after approval and requires bank name and account number for every payroll entry. It does not claim compatibility with CRDB, NMB, NBC, or another bank's proprietary layout. PAYE and other statutory CSV files are preparation reports, not government filing formats. Payslips support browser print / Save PDF; a server-side PDF generator is not included.
+
+The period lifecycle implemented here is `draft → processed → approved → paid → closed`. Approval and payment must be performed by a different user from the processor. Loan requests require an independent terms approval and a separately recorded disbursement before scheduled deductions begin; repayments are marked paid only when the payroll period is marked paid. A closed run cannot be edited or reopened. There is no accounting ledger integration, so no separate `posted` state is claimed. Web routes use the existing role middleware; employee payslip access is restricted to that employee and approved/paid/closed periods. No payroll REST API is exposed because the existing API surface is reserved for device integrations and has no web-token authentication stack.
+
+Statutory formulas and rates must be verified by the employer against the current TRA, social-security, health, WCF, SDL, and HESLB authorities; this repository does not ship a legal-rate seed. Progressive PAYE rules use annual brackets and annualize the configured pay-period base using the period frequency. Contribution rules support a configured basic/gross/taxable-pay basis, an exempt threshold, and an assessable ceiling. Verify every rule and output before production payroll use.
+
+The annual tax CSV is preparation data, not an official P9/P10 form or TRA filing. Attendance is not auto-converted into pay deductions: the app has no verified payroll-approved work calendar/absence source, and approved unpaid/fractional leave requires an employer-reviewed monetary adjustment. Manual adjustments are not an attendance/proration engine. Other support not implemented includes asynchronous/batched payroll jobs and progress tracking (Render currently uses the synchronous queue), statutory API filing, bank-specific export formats, email delivery, full payroll anomaly/dashboard analytics, and audited post-close correction/reversal workflows. No large-dataset load test has been run, so no employee-count or throughput capacity is claimed.
+
+### Payroll deployment and verification
+
+The Render Docker entrypoint runs `php artisan migrate --force` during service startup. The added schema uses additive migrations and does not reset or delete payroll data. For local verification, use a non-production SQLite database and run:
+
+```sh
+php artisan migrate --pretend
+php artisan migrate
+php artisan test --compact --filter=PayrollWorkflowTest
+npm run build
+```
+
+For production, back up the database before deployment, confirm that Render has PostgreSQL connectivity and `APP_DEBUG=false`, and verify all current statutory rules and employee profiles before processing. Render is configured for automatic deploys from the linked branch; after deploy, verify `/up`, login, payroll rule configuration, a non-production/test period, payslip authorization, and exports. The test suite uses fictitious rates only as calculation fixtures; they are not legal recommendations.
 
 ## Local development
 
@@ -125,7 +154,7 @@ Register the computer and issue its one-time token using the server commands abo
 
 ## Tests
 
-Run `php artisan test`. The current feature tests cover guest access, event API credential rejection, unmatched-event preservation, and duplicate submissions. They do not substitute for physical-device acceptance tests or Windows agent tests.
+Run `php artisan test`. Payroll feature coverage includes configured progressive tax and contribution calculations, effective-dated rule snapshots, approval separation, employee payslip access, statutory and bank CSV exports, period closing, missing-rule failure handling, and encryption of identifiers. The full suite does not substitute for official payroll/legal review, live production acceptance, physical-device tests, or Windows agent tests.
 
 ## Time and data handling
 

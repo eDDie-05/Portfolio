@@ -13,7 +13,10 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 #[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
+#[Hidden([
+    'password', 'remember_token', 'tax_identifier', 'pension_member_number', 'nhif_member_number',
+    'heslb_account_number', 'bank_name', 'bank_branch', 'bank_account_number',
+])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -87,6 +90,11 @@ class User extends Authenticatable
             'contract_starts_on' => 'immutable_date',
             'contract_ends_on' => 'immutable_date',
             'payroll_profile' => 'array',
+            'tax_identifier' => 'encrypted',
+            'pension_member_number' => 'encrypted',
+            'nhif_member_number' => 'encrypted',
+            'heslb_account_number' => 'encrypted',
+            'bank_account_number' => 'encrypted',
         ];
     }
 }

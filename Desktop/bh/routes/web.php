@@ -53,14 +53,34 @@ Route::middleware('auth')->get('/my-onboarding-tasks', [OnboardingController::cl
 Route::middleware(['auth', 'role:employee'])->group(function () {
     Route::get('/my-payroll', [PayrollController::class, 'mine'])->name('payroll.mine');
     Route::get('/my-payroll/payslips/{payrollEntry}', [PayrollController::class, 'payslip'])->name('payroll.payslip.mine');
+    Route::post('/my-payroll/overtime', [PayrollController::class, 'storeOvertimeRequest'])->name('payroll.overtime.store');
+    Route::post('/my-payroll/loans', [PayrollController::class, 'storeLoanRequest'])->name('payroll.loans.store');
 });
+Route::middleware(['auth', 'role:system_admin,hr_director,hr_manager,payroll_officer,finance_officer'])->group(function () {
+    Route::get('/payroll/approvals', [PayrollController::class, 'approvalQueue'])->name('payroll.approvals');
+    Route::post('/payroll/overtime/{payrollOvertime}/review', [PayrollController::class, 'reviewOvertime'])->name('payroll.overtime.review');
+});
+Route::middleware(['auth', 'role:system_admin,hr_director,finance_officer'])->post('/payroll/loans/{employeePayrollLoan}/review', [PayrollController::class, 'reviewLoan'])->name('payroll.loans.review');
+Route::middleware(['auth', 'role:system_admin,finance_officer'])->post('/payroll/loans/{employeePayrollLoan}/disburse', [PayrollController::class, 'recordLoanDisbursement'])->name('payroll.loans.disburse');
 Route::middleware(['auth', 'role:system_admin,hr_director,payroll_officer,finance_officer'])->group(function () {
     Route::get('/payroll', [PayrollController::class, 'index'])->name('payroll.index');
     Route::get('/payroll/periods/{payrollPeriod}', [PayrollController::class, 'showPeriod'])->name('payroll.periods.show');
     Route::get('/payroll/periods/{payrollPeriod}/export', [PayrollController::class, 'export'])->name('payroll.periods.export');
+    Route::get('/payroll/periods/{payrollPeriod}/statutory/{code}/export', [PayrollController::class, 'exportStatutory'])->name('payroll.periods.statutory.export');
+    Route::get('/payroll/periods/{payrollPeriod}/bank-payments/export', [PayrollController::class, 'exportBankPayments'])->name('payroll.periods.bank-payments.export');
+    Route::get('/payroll/reports/annual-preparation/{year}', [PayrollController::class, 'exportAnnualPreparation'])->name('payroll.reports.annual');
+    Route::get('/payroll/reports/departments/{year}', [PayrollController::class, 'exportDepartmentSummary'])->name('payroll.reports.departments');
     Route::get('/payroll/payslips/{payrollEntry}', [PayrollController::class, 'payslip'])->name('payroll.payslip');
 });
 Route::middleware(['auth', 'role:system_admin,hr_director,payroll_officer'])->group(function () {
+    Route::get('/payroll/salary-assignments/settings', [PayrollController::class, 'assignmentSettings'])->name('payroll.assignments.settings');
+    Route::get('/payroll/salary-components/settings', [PayrollController::class, 'componentSettings'])->name('payroll.components.settings');
+    Route::put('/payroll/salary-components/{salaryStructureComponent}/settings', [PayrollController::class, 'updateComponentSettings'])->name('payroll.components.settings.update');
+    Route::get('/payroll/settings/statutory', [PayrollController::class, 'statutorySettings'])->name('payroll.settings.statutory');
+    Route::post('/payroll/settings/statutory', [PayrollController::class, 'storeStatutoryRule'])->name('payroll.settings.statutory.store');
+    Route::post('/payroll/settings/statutory/{payrollStatutoryRule}/deactivate', [PayrollController::class, 'deactivateStatutoryRule'])->name('payroll.settings.statutory.deactivate');
+    Route::post('/payroll/settings/overtime', [PayrollController::class, 'storeOvertimeRule'])->name('payroll.settings.overtime.store');
+    Route::post('/payroll/settings/overtime/{payrollOvertimeRule}/deactivate', [PayrollController::class, 'deactivateOvertimeRule'])->name('payroll.settings.overtime.deactivate');
     Route::put('/payroll/employees/{employee}/statutory-profile', [PayrollController::class, 'updateStatutoryProfile'])->name('payroll.employees.statutory-profile');
     Route::post('/payroll/salary-structures', [PayrollController::class, 'storeStructure'])->name('payroll.structures.store');
     Route::post('/payroll/salary-structures/{salaryStructure}/deactivate', [PayrollController::class, 'deactivateStructure'])->name('payroll.structures.deactivate');
@@ -73,6 +93,7 @@ Route::middleware(['auth', 'role:system_admin,hr_director,payroll_officer'])->gr
 });
 Route::middleware(['auth', 'role:system_admin,hr_director,payroll_officer,finance_officer'])->post('/payroll/periods/{payrollPeriod}/approve', [PayrollController::class, 'approve'])->name('payroll.periods.approve');
 Route::middleware(['auth', 'role:system_admin,finance_officer'])->post('/payroll/periods/{payrollPeriod}/paid', [PayrollController::class, 'markPaid'])->name('payroll.periods.paid');
+Route::middleware(['auth', 'role:system_admin,finance_officer'])->post('/payroll/periods/{payrollPeriod}/close', [PayrollController::class, 'closePeriod'])->name('payroll.periods.close');
 Route::middleware(['auth', 'role:employee'])->get('/my-offboarding', [OffboardingController::class, 'myCases'])->name('offboarding.mine');
 Route::middleware(['auth', 'role:employee'])->group(function () {
     Route::get('/my-onboarding-documents', [OnboardingController::class, 'myDocuments'])->name('onboarding.documents.mine');

@@ -29,7 +29,7 @@ Artisan::command('hrms:create-admin', function () {
         return self::SUCCESS;
     }
     $user = new User;
-    $user->forceFill(['name' => $name, 'email' => $email, 'password' => Hash::make($password), 'role' => 'system_admin', 'email_verified_at' => now()])->save();
+    $user->forceFill(['name' => $name, 'email' => $email, 'password' => Hash::make($password), 'role' => 'system_admin', 'email_verified_at' => now(), 'must_change_password' => true])->save();
     $this->info('Administrator created. Sign in at /login.');
 
     return self::SUCCESS;
