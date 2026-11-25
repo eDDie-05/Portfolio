@@ -1,0 +1,214 @@
+.login-page {
+    position: relative;
+    isolation: isolate;
+    overflow-x: hidden;
+    padding: clamp(20px, 4vw, 48px);
+    background:
+        radial-gradient(ellipse at 18% 14%, rgba(49, 104, 235, 0.24), transparent 42%),
+        radial-gradient(ellipse at 86% 82%, rgba(226, 176, 48, 0.16), transparent 38%),
+        linear-gradient(135deg, #e8effb 0%, #f8faff 54%, #e5eef9 100%);
+}
+
+.login-page::before {
+    position: fixed;
+    z-index: 0;
+    inset: 0;
+    background: url('/images/TabLogoFit.svg') 76% 52% / min(96vw, 1080px) auto no-repeat;
+    content: '';
+    opacity: 0.25;
+    mix-blend-mode: multiply;
+    pointer-events: none;
+    animation: login-watermark-drift 16s ease-in-out infinite alternate;
+}
+
+.login-page::after {
+    position: fixed;
+    z-index: 0;
+    inset: -20%;
+    background:
+        radial-gradient(ellipse at 18% 28%, rgba(52, 126, 201, 0.12), transparent 34%),
+        radial-gradient(ellipse at 82% 66%, rgba(226, 176, 48, 0.12), transparent 32%);
+    content: '';
+    pointer-events: none;
+    animation: login-ambient-drift 18s ease-in-out infinite alternate;
+}
+
+.login-card {
+    position: relative;
+    z-index: 1;
+    width: min(440px, 100%);
+    padding: clamp(30px, 5vw, 42px);
+    border: 1px solid rgba(255, 255, 255, 0.88);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.62);
+    box-shadow:
+        0 28px 90px rgba(37, 59, 103, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(28px) saturate(160%);
+    -webkit-backdrop-filter: blur(28px) saturate(160%);
+    animation: login-card-enter 720ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
+}
+
+.login-brand {
+    margin-bottom: 30px;
+    animation: login-content-enter 650ms 80ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
+}
+
+.login-brand img {
+    width: 56px;
+    height: 52px;
+    background: rgba(255, 255, 255, 0.72);
+}
+
+.login-card .eyebrow {
+    color: #5272ac;
+    letter-spacing: 0.16em;
+    animation: login-content-enter 650ms 140ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
+}
+
+.login-card h1 {
+    font-size: 28px;
+}
+
+.login-card > p {
+    font-size: 13px;
+    line-height: 1.55;
+    animation: login-content-enter 650ms 220ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
+}
+
+.login-card label {
+    font-size: 11px;
+}
+
+.login-card input {
+    height: 46px;
+    border-radius: 10px;
+    font-size: 13px;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.login-card form {
+    animation: login-content-enter 650ms 280ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
+}
+
+.login-card input:focus {
+    border-color: #3974f6;
+    box-shadow: 0 0 0 3px rgba(57, 116, 246, 0.14);
+    outline: none;
+}
+
+.login-password-control {
+    position: relative;
+    width: 100%;
+}
+
+.login-card .login-password-control input {
+    padding-right: 68px;
+}
+
+.login-password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 9px;
+    min-width: 48px;
+    padding: 6px 8px;
+    border: 0;
+    border-radius: 7px;
+    color: #355f9f;
+    background: transparent;
+    font: 600 11px var(--font);
+    transform: translateY(-50%);
+    cursor: pointer;
+    transition: color 150ms ease, background-color 150ms ease;
+}
+
+.login-password-toggle:hover,
+.login-password-toggle:focus-visible {
+    color: #204785;
+    background: rgba(57, 116, 246, 0.09);
+    outline: none;
+}
+
+.login-card .login-button {
+    min-height: 48px;
+    border-radius: 10px;
+    box-shadow: 0 10px 24px rgba(37, 99, 235, 0.22);
+    transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.login-card .login-button:hover {
+    box-shadow: 0 14px 28px rgba(37, 99, 235, 0.28);
+    transform: translateY(-1px);
+}
+
+@keyframes login-card-enter {
+    from {
+        opacity: 0;
+        transform: translateY(14px) scale(0.985);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes login-content-enter {
+    from {
+        opacity: 0;
+        transform: translateY(9px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes login-watermark-drift {
+    from {
+        transform: translate3d(-1.5%, -1%, 0) scale(0.98);
+    }
+
+    to {
+        transform: translate3d(1.5%, 1%, 0) scale(1.03);
+    }
+}
+
+@keyframes login-ambient-drift {
+    from {
+        transform: translate3d(-1%, 0, 0) scale(0.98);
+    }
+
+    to {
+        transform: translate3d(1%, 1%, 0) scale(1.04);
+    }
+}
+
+@media (max-width: 700px) {
+    .login-page::before {
+        background-position: 76% 52%;
+        background-size: min(145vw, 720px) auto;
+        opacity: 0.2;
+    }
+
+    .login-card {
+        background: rgba(255, 255, 255, 0.76);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .login-page::before,
+    .login-page::after,
+    .login-card,
+    .login-brand,
+    .login-card .eyebrow,
+    .login-card > p,
+    .login-card form,
+    .login-card input,
+    .login-password-toggle,
+    .login-card .login-button {
+        animation: none;
+        transition: none;
+    }
+}
