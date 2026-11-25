@@ -7,11 +7,14 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
+use League\Flysystem\FilesystemException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AccountController extends Controller
@@ -40,17 +43,11 @@ class AccountController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
-            'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
-            'current_password' => ['required', 'current_password'],
+            'current_password' => ['required_with:password', 'nullable', 'current_password'],
             'password' => ['nullable', Password::min(12)->letters()->mixedCase()->numbers()->symbols(), 'confirmed'],
         ]);
 
         $updates = ['name' => $data['name'], 'email' => mb_strtolower($data['email'])];
-        $oldPhoto = null;
-        if (isset($data['profile_photo'])) {
-            $oldPhoto = $user->profile_photo_path;
-            $updates['profile_photo_path'] = $data['profile_photo']->store('profile-photos/'.$user->id, config('filesystems.private_disk'));
-        }
         $passwordChanged = filled($data['password'] ?? null);
         if ($passwordChanged) {
             $updates['password'] = Hash::make($data['password']);
@@ -58,11 +55,8 @@ class AccountController extends Controller
             $updates['must_change_password'] = false;
         }
 
-        DB::transaction(function () use ($request, $user, $updates, $passwordChanged, $oldPhoto): void {
+        DB::transaction(function () use ($request, $user, $updates, $passwordChanged): void {
             $user->forceFill($updates)->save();
-            if ($oldPhoto && isset($updates['profile_photo_path']) && $oldPhoto !== $updates['profile_photo_path']) {
-                Storage::disk(config('filesystems.private_disk'))->delete($oldPhoto);
-            }
             if ($passwordChanged && config('session.driver') === 'database' && Schema::hasTable('sessions')) {
                 DB::table('sessions')->where('user_id', $user->id)->where('id', '!=', $request->session()->getId())->delete();
             }
@@ -81,5 +75,49 @@ class AccountController extends Controller
         $request->session()->regenerate();
 
         return back()->with('status', $passwordChanged ? 'Account details and password updated. Other signed-in sessions were revoked.' : 'Account details updated.');
+    }
+
+    public function updateProfilePhoto(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+        $data = $request->validate([
+            'profile_photo' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+        ]);
+
+        $oldPhoto = $user->profile_photo_path;
+
+        try {
+            $photoPath = $data['profile_photo']->store(
+                'profile-photos/'.$user->id,
+                config('filesystems.private_disk')
+            );
+        } catch (FilesystemException $exception) {
+            Log::error('Profile photo upload failed.', ['user_id' => $user->id, 'exception' => $exception]);
+
+            throw ValidationException::withMessages([
+                'profile_photo' => 'The profile picture could not be saved. Please try again.',
+            ]);
+        }
+
+        if (! is_string($photoPath) || $photoPath === '') {
+            throw ValidationException::withMessages([
+                'profile_photo' => 'The profile picture could not be saved. Please try again.',
+            ]);
+        }
+
+        $user->forceFill(['profile_photo_path' => $photoPath])->save();
+
+        if ($oldPhoto && $oldPhoto !== $photoPath) {
+            try {
+                Storage::disk(config('filesystems.private_disk'))->delete($oldPhoto);
+            } catch (FilesystemException $exception) {
+                Log::warning('Previous profile photo could not be deleted after replacement.', [
+                    'user_id' => $user->id,
+                    'exception' => $exception,
+                ]);
+            }
+        }
+
+        return back()->with('status', 'Profile picture saved.');
     }
 }

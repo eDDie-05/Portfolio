@@ -6,8 +6,28 @@
 @section('content')
 <div class="page-wrap">
     <div class="page-heading">
-        <div><div class="eyebrow">ACCOUNT / SECURITY</div><h1>My account</h1><p>Update your sign-in email and password. Your current password is required to save changes.</p></div>
+        <div><div class="eyebrow">ACCOUNT / SECURITY</div><h1>My account</h1><p>Update your profile details and password.</p></div>
     </div>
+    @if(session('status'))<div class="flash">{{ session('status') }}</div>@endif
+    <form class="panel device-form" method="post" enctype="multipart/form-data" action="{{ route('account.profile-photo.update') }}">
+        @csrf
+        @method('PUT')
+        <div class="form-section">
+            <h2>Profile picture</h2>
+            <div class="account-photo-current">
+                @if($user->profile_photo_path)
+                    <img src="{{ route('account.profile-photo') }}" alt="">
+                @else
+                    <span class="account-photo-placeholder" aria-hidden="true">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
+                @endif
+                <div><strong>Profile picture</strong><span>This appears in the top bar and dashboard.</span></div>
+            </div>
+            <div class="form-grid">
+                <label>Choose profile picture<input type="file" name="profile_photo" required accept=".jpg,.jpeg,.png,.webp">@error('profile_photo')<small class="form-error">{{ $message }}</small>@enderror</label>
+            </div>
+        </div>
+        <div class="form-actions"><button class="button button-primary" type="submit">Save profile picture</button></div>
+    </form>
     <form class="panel device-form" method="post" enctype="multipart/form-data" action="{{ route('account.update') }}">
         @csrf
         @method('PUT')
@@ -16,8 +36,7 @@
             <div class="form-grid">
                 <label>Full name<input name="name" required maxlength="255" value="{{ old('name', $user->name) }}" autocomplete="name">@error('name')<small class="form-error">{{ $message }}</small>@enderror</label>
                 <label>Login email<input type="email" name="email" required maxlength="255" value="{{ old('email', $user->email) }}" autocomplete="username">@error('email')<small class="form-error">{{ $message }}</small>@enderror</label>
-                <label>Profile photo<input type="file" name="profile_photo" accept=".jpg,.jpeg,.png,.webp">@error('profile_photo')<small class="form-error">{{ $message }}</small>@enderror</label>
-                <label>Current password<input type="password" name="current_password" required autocomplete="current-password">@error('current_password')<small class="form-error">{{ $message }}</small>@enderror</label>
+                <label>Current password (only needed to change password)<input type="password" name="current_password" autocomplete="current-password">@error('current_password')<small class="form-error">{{ $message }}</small>@enderror</label>
             </div>
         </div>
         <div class="form-section">

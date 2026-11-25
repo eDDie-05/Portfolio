@@ -39,6 +39,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/account', [AccountController::class, 'edit'])->name('account.edit');
     Route::get('/account/profile-photo', [AccountController::class, 'profilePhoto'])->name('account.profile-photo');
     Route::put('/account', [AccountController::class, 'update'])->middleware('throttle:6,1')->name('account.update');
+    Route::put('/account/profile-photo', [AccountController::class, 'updateProfilePhoto'])->middleware('throttle:6,1')->name('account.profile-photo.update');
     Route::get('/announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
     Route::get('/announcements/{announcement}/download', [AnnouncementController::class, 'download'])->name('announcements.download');
 });
