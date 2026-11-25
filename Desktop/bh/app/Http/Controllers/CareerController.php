@@ -46,7 +46,7 @@ class CareerController extends Controller
             'privacy_acknowledged' => ['accepted'],
         ]);
         $uploadedFile = $data['resume'];
-        $storagePath = $uploadedFile->storeAs('recruitment/resumes/'.$jobVacancy->id, Str::uuid().'.pdf', 'local');
+        $storagePath = $uploadedFile->storeAs('recruitment/resumes/'.$jobVacancy->id, Str::uuid().'.pdf', config('filesystems.private_disk'));
         if ($storagePath === false) {
             abort(500, 'The resume could not be stored.');
         }
@@ -83,7 +83,7 @@ class CareerController extends Controller
                 $this->audit($request, 'recruitment.application_received', $application, ['job_vacancy_id' => $vacancy->id]);
             });
         } catch (Throwable $exception) {
-            Storage::disk('local')->delete($storagePath);
+            Storage::disk(config('filesystems.private_disk'))->delete($storagePath);
             throw $exception;
         }
 

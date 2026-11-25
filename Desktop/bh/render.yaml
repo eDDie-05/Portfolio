@@ -18,6 +18,18 @@ services:
         sync: false
       - key: HRMS_INITIAL_ADMIN_PASSWORD
         sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_BUCKET
+        sync: false
+      - key: AWS_DEFAULT_REGION
+        sync: false
+      - key: AWS_ENDPOINT
+        sync: false
+      - key: AWS_USE_PATH_STYLE_ENDPOINT
+        sync: false
       - key: APP_URL
         fromService:
           name: bravado-hrms
@@ -62,6 +74,8 @@ envVarGroups:
         value: sync
       - key: FILESYSTEM_DISK
         value: local
+      - key: PRIVATE_FILESYSTEM_DISK
+        value: s3
       - key: ATTENDANCE_TIMEZONE
         value: Africa/Dar_es_Salaam
       - key: MAIL_MAILER

@@ -38,7 +38,7 @@ class EmployeeDocumentController extends Controller
         ]);
         $uploadedFile = $data['document'];
         $extension = $uploadedFile->guessExtension() ?? $uploadedFile->extension();
-        $storagePath = $uploadedFile->storeAs('employee-documents/'.$employee->id, Str::uuid().'.'.$extension, 'local');
+        $storagePath = $uploadedFile->storeAs('employee-documents/'.$employee->id, Str::uuid().'.'.$extension, config('filesystems.private_disk'));
         if ($storagePath === false) {
             abort(500, 'The document could not be stored.');
         }
@@ -64,7 +64,7 @@ class EmployeeDocumentController extends Controller
                 ]);
             });
         } catch (Throwable $exception) {
-            Storage::disk('local')->delete($storagePath);
+            Storage::disk(config('filesystems.private_disk'))->delete($storagePath);
             throw $exception;
         }
 
@@ -125,7 +125,7 @@ class EmployeeDocumentController extends Controller
 
     private function download(Request $request, EmployeeDocument $document): StreamedResponse
     {
-        $disk = Storage::disk('local');
+        $disk = Storage::disk(config('filesystems.private_disk'));
         abort_unless($disk->exists($document->storage_path), 404);
         $this->audit($request, 'employee_document.downloaded', $document, ['employee_id' => $document->employee_id]);
 

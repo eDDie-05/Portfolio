@@ -19,10 +19,11 @@ class AccountController extends Controller
     public function profilePhoto(Request $request): StreamedResponse
     {
         $path = $request->user()->profile_photo_path;
-        abort_unless($path && Storage::disk('local')->exists($path), 404);
+        $disk = Storage::disk(config('filesystems.private_disk'));
+        abort_unless($path && $disk->exists($path), 404);
 
-        return Storage::disk('local')->download($path, basename($path), [
-            'Content-Type' => Storage::disk('local')->mimeType($path) ?: 'image/jpeg',
+        return $disk->response($path, basename($path), [
+            'Content-Type' => $disk->mimeType($path) ?: 'image/jpeg',
             'Cache-Control' => 'private, no-store',
         ]);
     }
@@ -48,7 +49,7 @@ class AccountController extends Controller
         $oldPhoto = null;
         if (isset($data['profile_photo'])) {
             $oldPhoto = $user->profile_photo_path;
-            $updates['profile_photo_path'] = $data['profile_photo']->store('profile-photos/'.$user->id, 'local');
+            $updates['profile_photo_path'] = $data['profile_photo']->store('profile-photos/'.$user->id, config('filesystems.private_disk'));
         }
         $passwordChanged = filled($data['password'] ?? null);
         if ($passwordChanged) {
@@ -60,7 +61,7 @@ class AccountController extends Controller
         DB::transaction(function () use ($request, $user, $updates, $passwordChanged, $oldPhoto): void {
             $user->forceFill($updates)->save();
             if ($oldPhoto && isset($updates['profile_photo_path']) && $oldPhoto !== $updates['profile_photo_path']) {
-                Storage::disk('local')->delete($oldPhoto);
+                Storage::disk(config('filesystems.private_disk'))->delete($oldPhoto);
             }
             if ($passwordChanged && config('session.driver') === 'database' && Schema::hasTable('sessions')) {
                 DB::table('sessions')->where('user_id', $user->id)->where('id', '!=', $request->session()->getId())->delete();

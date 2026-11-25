@@ -41,7 +41,7 @@ class AnnouncementController extends Controller
         if (isset($data['attachment'])) {
             $file = $data['attachment'];
             $extension = $file->guessExtension() ?? $file->extension();
-            $attachmentPath = $file->storeAs('announcements', Str::uuid().'.'.$extension, 'local');
+            $attachmentPath = $file->storeAs('announcements', Str::uuid().'.'.$extension, config('filesystems.private_disk'));
             $attachmentName = basename(str_replace('\\', '/', $file->getClientOriginalName()));
             $attachmentMime = $file->getMimeType();
         }
@@ -66,9 +66,10 @@ class AnnouncementController extends Controller
             $announcement->is_published || in_array($request->user()->role, ['system_admin', 'hr_director', 'hr_manager'], true),
             404,
         );
-        abort_unless($announcement->attachment_path && Storage::disk('local')->exists($announcement->attachment_path), 404);
+        $disk = Storage::disk(config('filesystems.private_disk'));
+        abort_unless($announcement->attachment_path && $disk->exists($announcement->attachment_path), 404);
 
-        return Storage::disk('local')->download(
+        return $disk->download(
             $announcement->attachment_path,
             $announcement->attachment_name,
             ['Content-Type' => $announcement->attachment_mime ?: 'application/octet-stream'],

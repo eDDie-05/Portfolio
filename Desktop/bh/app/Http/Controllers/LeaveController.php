@@ -254,7 +254,7 @@ class LeaveController extends Controller
             return null;
         }
         $extension = $attachment->guessExtension() ?? $attachment->extension();
-        $path = $attachment->storeAs('leave-attachments', Str::uuid().'.'.$extension, 'local');
+        $path = $attachment->storeAs('leave-attachments', Str::uuid().'.'.$extension, config('filesystems.private_disk'));
         if ($path === false) {
             abort(500, 'The leave attachment could not be stored.');
         }

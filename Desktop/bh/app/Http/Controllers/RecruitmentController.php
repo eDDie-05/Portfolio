@@ -209,7 +209,7 @@ class RecruitmentController extends Controller
 
     public function downloadResume(Request $request, JobApplication $jobApplication): StreamedResponse
     {
-        $disk = Storage::disk('local');
+        $disk = Storage::disk(config('filesystems.private_disk'));
         abort_unless($disk->exists($jobApplication->resume_path), 404);
         $this->audit($request, 'recruitment.resume_downloaded', $jobApplication, []);
 
@@ -223,7 +223,7 @@ class RecruitmentController extends Controller
     public function downloadOfferForHr(Request $request, JobApplication $jobApplication, RecruitmentOffer $recruitmentOffer): StreamedResponse
     {
         abort_unless($recruitmentOffer->job_application_id === $jobApplication->id, 404);
-        $disk = Storage::disk('local');
+        $disk = Storage::disk(config('filesystems.private_disk'));
         abort_unless($disk->exists($recruitmentOffer->letter_path), 404);
         $this->audit($request, 'recruitment.offer_downloaded_by_hr', $jobApplication, ['offer_id' => $recruitmentOffer->id]);
 
@@ -242,7 +242,7 @@ class RecruitmentController extends Controller
         ]);
         abort_unless($jobApplication->stage === 'offer', 409);
         $uploadedFile = $data['offer_letter'];
-        $storagePath = $uploadedFile->storeAs('recruitment/offers/'.$jobApplication->id, Str::uuid().'.pdf', 'local');
+        $storagePath = $uploadedFile->storeAs('recruitment/offers/'.$jobApplication->id, Str::uuid().'.pdf', config('filesystems.private_disk'));
         if ($storagePath === false) {
             abort(500, 'The offer letter could not be stored.');
         }
@@ -278,7 +278,7 @@ class RecruitmentController extends Controller
                 return $offer;
             });
         } catch (\Throwable $exception) {
-            Storage::disk('local')->delete($storagePath);
+            Storage::disk(config('filesystems.private_disk'))->delete($storagePath);
             throw $exception;
         }
 
@@ -307,7 +307,7 @@ class RecruitmentController extends Controller
     public function downloadOfferLetter(Request $request, RecruitmentOffer $recruitmentOffer): StreamedResponse
     {
         $this->authorizeOfferLink($request, $recruitmentOffer);
-        $disk = Storage::disk('local');
+        $disk = Storage::disk(config('filesystems.private_disk'));
         abort_unless($disk->exists($recruitmentOffer->letter_path), 404);
         $this->audit($request, 'recruitment.offer_downloaded', $recruitmentOffer->application, ['offer_id' => $recruitmentOffer->id]);
 

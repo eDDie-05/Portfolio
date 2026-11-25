@@ -132,12 +132,12 @@ class EmployeeController extends Controller
             $department = $this->resolveDepartment($request, $data['department'] ?? null, $request->user()->role !== 'hr_manager');
             $user = new User;
             $photoPath = isset($data['profile_photo'])
-                ? $data['profile_photo']->store('profile-photos', 'local')
+                ? $data['profile_photo']->store('profile-photos', config('filesystems.private_disk'))
                 : null;
             $user->forceFill(['name' => $data['name'], 'email' => mb_strtolower($data['email']), 'employee_no' => $data['employee_no'], 'department' => $department?->name, 'department_id' => $department?->id, 'branch_id' => $data['branch_id'] ?? null, 'manager_id' => $data['manager_id'] ?? null, 'password' => Hash::make($data['password']), 'role' => $data['role'], 'is_active' => true, 'must_change_password' => true, 'email_verified_at' => now(), 'profile_photo_path' => $photoPath, ...$this->employeeProfileAttributes($data)])->save();
             if (isset($data['contract_document'])) {
                 $extension = $data['contract_document']->guessExtension() ?? $data['contract_document']->extension();
-                $path = $data['contract_document']->storeAs('employee-documents/'.$user->id, Str::uuid().'.'.$extension, 'local');
+                $path = $data['contract_document']->storeAs('employee-documents/'.$user->id, Str::uuid().'.'.$extension, config('filesystems.private_disk'));
                 $user->documents()->create([
                     'uploaded_by' => $request->user()->id,
                     'category' => 'Employment contract',
@@ -258,10 +258,10 @@ class EmployeeController extends Controller
             }
             if (isset($data['profile_photo'])) {
                 $oldPhoto = $employee->profile_photo_path;
-                $data['profile_photo_path'] = $data['profile_photo']->store('profile-photos/'.$employee->id, 'local');
+                $data['profile_photo_path'] = $data['profile_photo']->store('profile-photos/'.$employee->id, config('filesystems.private_disk'));
                 unset($data['profile_photo']);
                 if ($oldPhoto) {
-                    Storage::disk('local')->delete($oldPhoto);
+                    Storage::disk(config('filesystems.private_disk'))->delete($oldPhoto);
                 }
             }
             unset($data['contract_document']);

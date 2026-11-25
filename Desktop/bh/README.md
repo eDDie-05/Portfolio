@@ -39,7 +39,8 @@ Bravado Group's Laravel attendance and HRMS foundation. The implementation keeps
 - Windows agent build, signed deployment package, endpoint security-log configuration validation, computer-account mapping screen, and testing on an authorized Windows machine.
 - TLS certificates and a production HTTPS ingress/reverse proxy. Compose binds its development Nginx port to localhost; expose it only behind the company's HTTPS gateway.
 - Backup automation, restore drills, retention policy, and deployment-specific secret rotation.
-- Persistent private file storage, encryption-at-rest policy, and backup/restore for employee documents must be configured for the production host.
+- Render routes private uploads to a private S3-compatible bucket. Before deployment, configure the bucket name, region, access key, secret key, and (when required) endpoint/path-style setting in Render; keep public access disabled, enable encryption at rest, and grant the app only the bucket permissions it needs. Copy any existing files from local storage to the bucket at the same relative paths before switching the production service. Set up bucket versioning/backup and retention according to the employer's data policy.
+- Production database capacity, high availability, backup automation, restore drills, and retention still need a production-sized plan. The current free Render database/service settings are not a capacity guarantee for large datasets; choose paid resource limits from expected attendance volume and retention requirements before production use.
 
 Do not report devices as connected until a credentialed event batch arrives from a compatibility-verified device. The connection-check action records a skipped check until a compatible adapter is configured.
 
@@ -64,7 +65,7 @@ These local commands assume `.env` was copied from `.env.example`, which uses SQ
 
 ## Docker deployment baseline
 
-1. Copy `.env.example` to `.env` and set a unique `APP_KEY`, strong `DB_PASSWORD`, public `APP_URL`, `APP_DEBUG=false`, `SESSION_ENCRYPT=true`, and `SESSION_SECURE_COOKIE=true`. Keep `.env` private.
+1. Copy `.env.example` to `.env` and set a unique `APP_KEY`, strong `DB_PASSWORD`, public `APP_URL`, `APP_DEBUG=false`, `SESSION_ENCRYPT=true`, and `SESSION_SECURE_COOKIE=true`. For production, set `PRIVATE_FILESYSTEM_DISK=s3` and configure the S3-compatible bucket credentials and endpoint. Keep `.env` private.
 2. Run `docker compose up -d --build`.
 3. Run `docker compose exec app php artisan migrate --force`.
 4. Run `docker compose exec app php artisan hrms:create-admin`.

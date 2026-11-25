@@ -122,7 +122,7 @@ class OnboardingController extends Controller
         abort_unless(in_array($request->user()->role, ['system_admin', 'hr_director']) || $onboardingCase->assigned_to === $request->user()->id, 403);
         $data = $request->validate(['contract' => ['required', 'file', 'mimes:pdf', 'max:10240']]);
         $uploadedFile = $data['contract'];
-        $storagePath = $uploadedFile->storeAs('onboarding/contracts/'.$onboardingCase->id, Str::uuid().'.pdf', 'local');
+        $storagePath = $uploadedFile->storeAs('onboarding/contracts/'.$onboardingCase->id, Str::uuid().'.pdf', config('filesystems.private_disk'));
         if ($storagePath === false) {
             abort(500, 'The contract could not be stored.');
         }
@@ -150,7 +150,7 @@ class OnboardingController extends Controller
                 return $contract;
             });
         } catch (Throwable $exception) {
-            Storage::disk('local')->delete($storagePath);
+            Storage::disk(config('filesystems.private_disk'))->delete($storagePath);
             throw $exception;
         }
 
@@ -167,7 +167,7 @@ class OnboardingController extends Controller
             $this->authorizeCase($request, $case);
         }
 
-        $disk = Storage::disk('local');
+        $disk = Storage::disk(config('filesystems.private_disk'));
         abort_unless($disk->exists($onboardingContract->original_path), 404);
         $this->audit($request, 'onboarding.contract_downloaded', $onboardingContract, ['case_id' => $case->id]);
 
@@ -191,7 +191,7 @@ class OnboardingController extends Controller
         $uploadedFile = $data['signed_contract'] ?? null;
         $storagePath = null;
         if ($uploadedFile) {
-            $storagePath = $uploadedFile->storeAs('employee-documents/'.$case->employee_id, Str::uuid().'.pdf', 'local');
+            $storagePath = $uploadedFile->storeAs('employee-documents/'.$case->employee_id, Str::uuid().'.pdf', config('filesystems.private_disk'));
             if ($storagePath === false) {
                 abort(500, 'The signed contract could not be stored.');
             }
@@ -231,7 +231,7 @@ class OnboardingController extends Controller
             });
         } catch (Throwable $exception) {
             if ($storagePath !== null) {
-                Storage::disk('local')->delete($storagePath);
+                Storage::disk(config('filesystems.private_disk'))->delete($storagePath);
             }
             throw $exception;
         }
@@ -245,7 +245,7 @@ class OnboardingController extends Controller
         $this->authorizeCase($request, $case);
         abort_unless($onboardingContract->status === 'signed' && $onboardingContract->signedDocument, 404);
         $document = $onboardingContract->signedDocument;
-        $disk = Storage::disk('local');
+        $disk = Storage::disk(config('filesystems.private_disk'));
         abort_unless($disk->exists($document->storage_path), 404);
         $this->audit($request, 'onboarding.signed_contract_downloaded', $onboardingContract, ['case_id' => $case->id, 'employee_document_id' => $document->id]);
 
@@ -265,7 +265,7 @@ class OnboardingController extends Controller
         $data = $request->validate(['document' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240']]);
         $uploadedFile = $data['document'];
         $extension = $uploadedFile->guessExtension() ?? $uploadedFile->extension();
-        $storagePath = $uploadedFile->storeAs('employee-documents/'.$case->employee_id, Str::uuid().'.'.$extension, 'local');
+        $storagePath = $uploadedFile->storeAs('employee-documents/'.$case->employee_id, Str::uuid().'.'.$extension, config('filesystems.private_disk'));
         if ($storagePath === false) {
             abort(500, 'The document could not be stored.');
         }
@@ -292,7 +292,7 @@ class OnboardingController extends Controller
                 $this->audit($request, 'onboarding.document_submitted', $lockedRequest, ['case_id' => $case->id, 'employee_document_id' => $document->id]);
             });
         } catch (Throwable $exception) {
-            Storage::disk('local')->delete($storagePath);
+            Storage::disk(config('filesystems.private_disk'))->delete($storagePath);
             throw $exception;
         }
 
@@ -305,7 +305,7 @@ class OnboardingController extends Controller
         $this->authorizeCase($request, $case);
         abort_unless($onboardingDocumentRequest->status === 'submitted' && $onboardingDocumentRequest->document, 404);
         $document = $onboardingDocumentRequest->document;
-        $disk = Storage::disk('local');
+        $disk = Storage::disk(config('filesystems.private_disk'));
         abort_unless($disk->exists($document->storage_path), 404);
         $this->audit($request, 'employee_document.downloaded', $document, ['employee_id' => $document->employee_id, 'onboarding_case_id' => $case->id]);
 
