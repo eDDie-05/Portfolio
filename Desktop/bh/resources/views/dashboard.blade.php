@@ -16,11 +16,7 @@
     <header class="dashboard-welcome">
         <div class="dashboard-welcome-identity">
             <a class="dashboard-profile-avatar" href="{{ route('account.edit') }}" aria-label="Open your account settings">
-                @if(auth()->user()->profile_photo_path)
-                    <img src="{{ route('account.profile-photo') }}" alt="">
-                @else
-                    <span class="dashboard-profile-fallback" aria-hidden="true">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
-                @endif
+                <span class="dashboard-profile-fallback" aria-hidden="true">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
             </a>
             <div class="dashboard-welcome-copy">
                 <div class="eyebrow">BRAVADO HR MANAGEMENT SYSTEM</div>

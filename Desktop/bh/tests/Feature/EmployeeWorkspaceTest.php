@@ -5,9 +5,7 @@ namespace Tests\Feature;
 use App\Models\Branch;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class EmployeeWorkspaceTest extends TestCase
@@ -30,7 +28,7 @@ class EmployeeWorkspaceTest extends TestCase
             'phone' => '+255 700 123456', 'address' => 'Mikocheni, Dar es Salaam', 'date_of_birth' => '1992-04-18',
             'emergency_contact_name' => 'Neema Employee', 'emergency_contact_phone' => '+255 700 654321', 'emergency_contact_relationship' => 'Sibling',
             'job_title' => 'Operations Analyst', 'employment_type' => 'permanent', 'joined_on' => '2026-01-10',
-            'probation_ends_on' => '2026-04-10', 'contract_starts_on' => '2026-01-10', 'contract_ends_on' => '2027-01-09',
+            'contract_starts_on' => '2026-01-10', 'contract_ends_on' => '2027-01-09',
             'password' => 'InitialPassword123!', 'password_confirmation' => 'InitialPassword123!',
         ])->assertRedirect('/employees');
 
@@ -63,10 +61,11 @@ class EmployeeWorkspaceTest extends TestCase
             'employee_no' => 'BRV-104',
             'branch_id' => $branch->id,
             'joined_on' => '2026-04-10',
-            'probation_ends_on' => '2026-04-09',
+            'contract_starts_on' => '2026-04-10',
+            'contract_ends_on' => '2026-04-09',
             'password' => 'InitialPassword123!',
             'password_confirmation' => 'InitialPassword123!',
-        ])->assertSessionHasErrors('probation_ends_on');
+        ])->assertSessionHasErrors('contract_ends_on');
 
         $this->assertDatabaseMissing('users', ['employee_no' => 'BRV-104']);
     }
@@ -105,23 +104,5 @@ class EmployeeWorkspaceTest extends TestCase
             ->assertDontSee('Add employee')
             ->assertDontSee('Review leave')
             ->assertDontSee('View reports');
-    }
-
-    public function test_profile_photo_is_served_inline_and_shown_in_the_dashboard(): void
-    {
-        Storage::fake('local');
-        $administrator = $this->administrator();
-        $photoPath = UploadedFile::fake()->image('profile.png')->store('profile-photos/'.$administrator->id, 'local');
-        $administrator->forceFill(['profile_photo_path' => $photoPath])->save();
-
-        $photoResponse = $this->actingAs($administrator)->get(route('account.profile-photo'));
-        $photoResponse->assertOk()->assertHeader('Content-Type', 'image/png');
-        $this->assertStringStartsWith('inline;', $photoResponse->headers->get('Content-Disposition'));
-
-        $this->get('/')
-            ->assertOk()
-            ->assertSee(route('account.profile-photo'), false)
-            ->assertSee('dashboard-profile-avatar', false);
-        $this->get(route('account.edit'))->assertOk()->assertSee('Profile picture');
     }
 }

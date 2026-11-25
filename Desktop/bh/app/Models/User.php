@@ -57,11 +57,6 @@ class User extends Authenticatable
         return $this->hasMany(EmployeeDocument::class, 'employee_id');
     }
 
-    public function probationReviewer(): BelongsTo
-    {
-        return $this->belongsTo(self::class, 'probation_reviewed_by');
-    }
-
     public function offboardingCases(): HasMany
     {
         return $this->hasMany(OffboardingCase::class, 'employee_id');
@@ -86,7 +81,6 @@ class User extends Authenticatable
             'password' => 'hashed',
             'date_of_birth' => 'immutable_date',
             'joined_on' => 'immutable_date',
-            'probation_ends_on' => 'immutable_date',
             'contract_starts_on' => 'immutable_date',
             'contract_ends_on' => 'immutable_date',
             'payroll_profile' => 'array',

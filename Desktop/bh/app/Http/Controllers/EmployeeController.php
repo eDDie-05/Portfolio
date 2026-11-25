@@ -50,7 +50,7 @@ class EmployeeController extends Controller
 
         return response()->streamDownload(function () use ($employees): void {
             $output = fopen('php://output', 'w');
-            fputcsv($output, ['Employee number', 'Name', 'Work email', 'Phone', 'Job title', 'Employment type', 'Department', 'Branch', 'Joining date', 'Probation ends', 'Contract starts', 'Contract ends', 'Status']);
+            fputcsv($output, ['Employee number', 'Name', 'Work email', 'Phone', 'Job title', 'Employment type', 'Department', 'Branch', 'Joining date', 'Contract starts', 'Contract ends', 'Status']);
 
             foreach ($employees as $employee) {
                 fputcsv($output, [
@@ -63,7 +63,6 @@ class EmployeeController extends Controller
                     $this->safeCsvValue($employee->department),
                     $this->safeCsvValue($employee->branch?->name),
                     $employee->joined_on?->toDateString(),
-                    $employee->probation_ends_on?->toDateString(),
                     $employee->contract_starts_on?->toDateString(),
                     $employee->contract_ends_on?->toDateString(),
                     $employee->is_active ? 'Active' : 'Inactive',
@@ -94,7 +93,6 @@ class EmployeeController extends Controller
             'employee_no' => ['nullable', 'string', 'max:80', 'unique:users,employee_no'],
             'department' => ['nullable', 'string', 'max:120'],
             'gender' => ['nullable', 'in:male,female,non_binary,prefer_not_to_say,other'],
-            'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'contract_document' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
             'satisfaction_score' => ['nullable', 'integer', 'between:0,100'],
             'performance_score' => ['nullable', 'integer', 'between:0,100'],
@@ -131,10 +129,7 @@ class EmployeeController extends Controller
         $user = DB::transaction(function () use ($data, $request): User {
             $department = $this->resolveDepartment($request, $data['department'] ?? null, $request->user()->role !== 'hr_manager');
             $user = new User;
-            $photoPath = isset($data['profile_photo'])
-                ? $data['profile_photo']->store('profile-photos', config('filesystems.private_disk'))
-                : null;
-            $user->forceFill(['name' => $data['name'], 'email' => mb_strtolower($data['email']), 'employee_no' => $data['employee_no'], 'department' => $department?->name, 'department_id' => $department?->id, 'branch_id' => $data['branch_id'] ?? null, 'manager_id' => $data['manager_id'] ?? null, 'password' => Hash::make($data['password']), 'role' => $data['role'], 'is_active' => true, 'must_change_password' => true, 'email_verified_at' => now(), 'profile_photo_path' => $photoPath, ...$this->employeeProfileAttributes($data)])->save();
+            $user->forceFill(['name' => $data['name'], 'email' => mb_strtolower($data['email']), 'employee_no' => $data['employee_no'], 'department' => $department?->name, 'department_id' => $department?->id, 'branch_id' => $data['branch_id'] ?? null, 'manager_id' => $data['manager_id'] ?? null, 'password' => Hash::make($data['password']), 'role' => $data['role'], 'is_active' => true, 'must_change_password' => true, 'email_verified_at' => now(), ...$this->employeeProfileAttributes($data)])->save();
             if (isset($data['contract_document'])) {
                 $extension = $data['contract_document']->guessExtension() ?? $data['contract_document']->extension();
                 $path = $data['contract_document']->storeAs('employee-documents/'.$user->id, Str::uuid().'.'.$extension, config('filesystems.private_disk'));
@@ -184,7 +179,6 @@ class EmployeeController extends Controller
             'manager_id' => ['nullable', 'integer', Rule::exists('users', 'id')->where('role', 'hr_manager')->where('is_active', true)],
             'is_active' => ['required', 'boolean'],
             'gender' => ['nullable', 'in:male,female,non_binary,prefer_not_to_say,other'],
-            'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'contract_document' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
             'satisfaction_score' => ['nullable', 'integer', 'between:0,100'],
             'performance_score' => ['nullable', 'integer', 'between:0,100'],
@@ -255,14 +249,6 @@ class EmployeeController extends Controller
                 }
             } else {
                 unset($data['password']);
-            }
-            if (isset($data['profile_photo'])) {
-                $oldPhoto = $employee->profile_photo_path;
-                $data['profile_photo_path'] = $data['profile_photo']->store('profile-photos/'.$employee->id, config('filesystems.private_disk'));
-                unset($data['profile_photo']);
-                if ($oldPhoto) {
-                    Storage::disk(config('filesystems.private_disk'))->delete($oldPhoto);
-                }
             }
             unset($data['contract_document']);
             $data['email'] = mb_strtolower($data['email']);
@@ -363,7 +349,6 @@ class EmployeeController extends Controller
             'job_title' => ['nullable', 'string', 'max:120'],
             'employment_type' => ['nullable', 'in:permanent,fixed_term,casual,part_time,intern,consultant,other'],
             'joined_on' => ['nullable', 'date'],
-            'probation_ends_on' => ['nullable', 'date'],
             'contract_starts_on' => ['nullable', 'date'],
             'contract_ends_on' => ['nullable', 'date'],
             'gender' => ['nullable', 'in:male,female,non_binary,prefer_not_to_say,other'],
@@ -386,7 +371,7 @@ class EmployeeController extends Controller
         return [
             'phone', 'address', 'date_of_birth', 'emergency_contact_name', 'emergency_contact_phone',
             'emergency_contact_relationship', 'job_title', 'employment_type', 'joined_on',
-            'probation_ends_on', 'contract_starts_on', 'contract_ends_on',
+            'contract_starts_on', 'contract_ends_on',
             'gender', 'satisfaction_score', 'performance_score',
         ];
     }
@@ -394,7 +379,7 @@ class EmployeeController extends Controller
     /** @param array<string, mixed> $validatedData */
     private function validateEmploymentDates(array $validatedData): void
     {
-        foreach ([['joined_on', 'probation_ends_on'], ['contract_starts_on', 'contract_ends_on']] as [$startDate, $endDate]) {
+        foreach ([['contract_starts_on', 'contract_ends_on']] as [$startDate, $endDate]) {
             if (! empty($validatedData[$startDate]) && ! empty($validatedData[$endDate]) && CarbonImmutable::parse($validatedData[$endDate])->lt(CarbonImmutable::parse($validatedData[$startDate]))) {
                 throw ValidationException::withMessages([$endDate => 'The end date must be on or after its start date.']);
             }
